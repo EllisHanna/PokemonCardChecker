@@ -18,7 +18,10 @@
   </head>
   <body>
     <div id="top-header">
-      <h1>Pokemon Card Checker</h1>
+      <h1>
+        Pokémon <span class="black-text">Card</span>
+        <span class="white-text">Checker</span>
+      </h1>
     </div>
     <div id="my-cards-section">
       <div id="my-cards-header">
@@ -39,8 +42,10 @@
             <div>
               <h2>
                 <span class="card-name">{{ card.name }}</span>
-                <span class="card-number">#{{ card.number }} </span>
               </h2>
+              <p>
+                <span class="card-number">#{{ card.number }} </span>
+              </p>
             </div>
             <div class="card-desc">
               <p>

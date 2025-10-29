@@ -22,6 +22,8 @@ def add_card():
     name = data.get("name")
     number = data.get("number")
 
+    name = name.capitalize()
+
     if not name or not number:
         return jsonify({"error": "Missing required fields: name and number"}), 400
 

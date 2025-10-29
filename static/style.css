@@ -1,10 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+
 :root {
-  --primary: #ffffff;
-  --primary2: #bdbdd5;
-  --secondary: #737b9c;
-  --secondary2: #4a4a6a;
-  --accent: #39b4f6;
-  font-family: "Jersey 10", sans-serif;
+  --primary: #f2f5f8;
+  --primary2: #cfd8e0;
+  --secondary: #24303a;
+  --secondary2: #2f3943;
+  --accent: #5ab7f6;
+  font-family: "Press Start 2P", monospace;
   color: var(--primary);
 }
 
@@ -37,13 +39,30 @@ html {
 }
 
 /* Top Page */
-
 #top-header {
   background-color: var(--secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px;
+}
+
+#top-header h1 {
+  font-family: "Press Start 2P", monospace;
+  font-size: 28px;
+  background: linear-gradient(
+    to bottom,
+    #e3350d 0%,
+    #e3350d 45%,
+    #000000 45%,
+    #000000 55%,
+    #ffffff 55%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 /* My Cards */
@@ -56,10 +75,27 @@ html {
   justify-content: space-between;
 }
 
+#my-cards-header h2 {
+  background: linear-gradient(
+    to bottom,
+    #6e2cb0 0%,
+    #6e2cb0 45%,
+    #000000 45%,
+    #000000 55%,
+    #ffffff 55%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
 #my-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(470px, 470px));
+  grid-auto-rows: 300px;
+  gap: 10px;
   padding: 20px;
   width: 100%;
   min-height: 98vh;
@@ -70,16 +106,18 @@ html {
   flex-direction: row;
   justify-content: center;
   background-color: var(--secondary);
-  height: 250px;
+  height: 300px;
   max-width: 600px;
   margin: 0 auto;
   gap: 10px;
+  border-radius: 10px;
 }
 
 .card-img {
   width: 200px;
-  height: 250px;
+  height: 300px;
   object-fit: fill;
+  border-radius: 10px;
 }
 
 .card-name {
@@ -87,16 +125,15 @@ html {
 }
 
 .card-number {
-  color: var(--secondary2);
+  color: var(--primary2);
 }
 
 .desc {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 50px;
+  justify-content: space-between;
   padding: 10px;
-  font-size: 20px;
+  padding-bottom: 50px;
 }
 
 .card-desc {
