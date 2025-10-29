@@ -83,7 +83,7 @@ html {
 }
 
 .card-name {
-  color: var(--accent);
+  font-weight: 800;
 }
 
 .card-number {
