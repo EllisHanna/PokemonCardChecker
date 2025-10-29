@@ -1,0 +1,106 @@
+:root {
+  --primary: #ffffff;
+  --primary2: #bdbdd5;
+  --secondary: #737b9c;
+  --secondary2: #4a4a6a;
+  --accent: #39b4f6;
+  font-family: "Jersey 10", sans-serif;
+  color: var(--primary);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--secondary2);
+  overflow-x: hidden;
+}
+
+.highlight-accent {
+  color: var(--accent);
+}
+
+.plus-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background-color: var(--secondary);
+  border: none;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+/* Top Page */
+
+#top-header {
+  background-color: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+/* My Cards */
+#my-cards-header {
+  border-bottom: solid 1px var(--secondary);
+  margin: 30px;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#my-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+  min-height: 98vh;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  background-color: var(--secondary);
+  height: 250px;
+  max-width: 600px;
+  margin: 0 auto;
+  gap: 10px;
+}
+
+.card-img {
+  width: 200px;
+  height: 250px;
+  object-fit: fill;
+}
+
+.card-name {
+  color: var(--accent);
+}
+
+.card-number {
+  color: var(--secondary2);
+}
+
+.desc {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 50px;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.card-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

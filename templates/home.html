@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Italiana&family=Jersey+10&family=Karla:ital,wght@0,200..800;1,200..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Pixelify+Sans:wght@400..700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <title>PCC</title>
+  </head>
+  <body>
+    <div id="top-header">
+      <h1>Pokemon Card Checker</h1>
+    </div>
+    <div id="my-cards-section">
+      <div id="my-cards-header">
+        <h2>My Cards</h2>
+        <button class="plus-button">+</button>
+      </div>
+      <div id="my-cards-grid">
+        {% for card in cards %}
+        <div class="card">
+          {% if card.image_base64 %}
+          <img
+            class="card-img"
+            src="data:image/jpeg;base64,{{ card.image_base64 }}"
+            alt="{{ card.name }}"
+          />
+          {% endif %}
+          <div class="desc">
+            <div>
+              <h2>
+                <span class="card-name">{{ card.name }}</span>
+                <span class="card-number">#{{ card.number }} </span>
+              </h2>
+            </div>
+            <div class="card-desc">
+              <p>
+                Ungraded Price:
+                <span class="highlight-accent">{{ card.ungraded_price }}</span>
+              </p>
+              <p>
+                Graded Price:
+                <span class="highlight-accent">{{ card.graded_price }}</span>
+              </p>
+              <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </body>
+</html>
