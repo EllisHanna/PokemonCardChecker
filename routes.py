@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from models import db, PokemonCard
 import asyncio
 from webscraper import webscrape
@@ -18,9 +18,8 @@ def home():
 
 @main.route("/add_card", methods=["POST"])
 def add_card():
-    data = request.get_json()
-    name = data.get("name")
-    number = data.get("number")
+    name = request.form.get("name")
+    number = request.form.get("number")
 
     name = name.capitalize()
 
@@ -37,16 +36,7 @@ def add_card():
         import base64
         image_base64 = base64.b64encode(card.image).decode("utf-8")
 
-        return jsonify({
-            "message": "Card added successfully",
-            "card": {
-                "name": name,
-                "number": number,
-                "ungraded_price": ungraded_price,
-                "graded_price": graded_price,
-                "image": image_base64
-            }
-        }), 201
+        return redirect(url_for("main.home"))
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -64,3 +54,10 @@ def cards():
             "created_at": c.created_at
         } for c in cards
     ])
+
+@main.route("/delete_card/<int:card_id>", methods=["DELETE"])
+def delete_card(card_id):
+    card = PokemonCard.query.get_or_404(card_id)
+    db.session.delete(card)
+    db.session.commit()
+    return jsonify({"success": True})

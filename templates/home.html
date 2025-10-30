@@ -26,7 +26,10 @@
     <div id="my-cards-section">
       <div id="my-cards-header">
         <h2>My Cards</h2>
-        <button class="plus-button">+</button>
+        <div id="plus-delete-container">
+          <button class="plus-button">+</button>
+          <button class="bin-button"><img id="bin-img" src="static/images/bin.png"></button>
+        </div>
       </div>
       <div id="my-cards-grid">
         {% for card in cards %}
@@ -62,6 +65,22 @@
         </div>
         {% endfor %}
       </div>
+      <div id="add-card-modal" class="modal">
+        <div class="modal-content">
+          <span class="close-button">&times;</span>
+          <h2>Add Card</h2>
+          <form id="add-card-form" method="POST" action="{{ url_for('main.add_card') }}">
+            <label for="card-name">Name:</label>
+            <input type="text" id="card-name" name="name" required />
+
+            <label for="card-number">Number:</label>
+            <input type="text" id="card-number" name="number" required />
+
+            <button type="submit" class="submit-button">Add Card</button>
+          </form>
+        </div>
+      </div>
     </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
   </body>
 </html>
