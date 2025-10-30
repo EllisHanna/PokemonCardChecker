@@ -8,7 +8,7 @@ main = Blueprint("main", __name__)
 
 @main.route("/")
 def home():
-    cards = PokemonCard.query.order_by(PokemonCard.created_at.desc()).all()
+    cards = PokemonCard.query.order_by(PokemonCard.ungraded_price.desc()).all()
     for card in cards:
         if card.image:
             card.image_base64 = base64.b64encode(card.image).decode("utf-8")
@@ -27,7 +27,18 @@ def add_card():
         return jsonify({"error": "Missing required fields: name and number"}), 400
 
     try:
-        ungraded_price, graded_price, img_bytes = asyncio.run(webscrape(name,number))
+        import re
+        from decimal import Decimal
+
+        def parse_price(price_str):
+            if not price_str:
+                return None
+            cleaned = re.sub(r"[^\d.]", "", str(price_str))
+            return Decimal(cleaned) if cleaned else None
+
+        ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
+        ungraded_price = parse_price(ungraded_price_raw)
+        graded_price = parse_price(graded_price_raw)
 
         card = PokemonCard(name=name, number=number, ungraded_price=ungraded_price, graded_price=graded_price, image=img_bytes)
         db.session.add(card)
@@ -43,7 +54,7 @@ def add_card():
     
 @main.route("/cards", methods=["GET"])
 def cards():
-    cards = PokemonCard.query.order_by(PokemonCard.created_at.desc()).all()
+    cards = PokemonCard.query.order_by(PokemonCard.ungraded_price.desc()).all()
     return jsonify([
         {
             "id": c.id,

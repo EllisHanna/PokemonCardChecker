@@ -18,6 +18,6 @@ class PokemonCard(db.Model):
     image = db.Column(db.LargeBinary)
     name = db.Column(db.String(100), nullable=False)
     number = db.Column(db.String(20), nullable=False)
-    ungraded_price = db.Column(db.String(20))
-    graded_price = db.Column(db.String(20))
+    ungraded_price = db.Column(db.Numeric(10,2))
+    graded_price = db.Column(db.Numeric(10,2))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
