@@ -1,16 +1,11 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from models import db, PokemonCard
 import asyncio
-import easyocr
 from webscraper import webscrape
 import base64
-import cv2
-import numpy as np
-import re
 
 main = Blueprint("main", __name__)
 
-@main.route("/")
 def home():
     cards = PokemonCard.query.order_by(PokemonCard.ungraded_price.desc()).all()
     for card in cards:
@@ -70,14 +65,6 @@ def cards():
         } for c in cards
     ])
 
-@main.route("/ocr", methods=["POST"])
-def ocr():
-    img = request.files.get("image")
-    img_bytes = img.read()
-
-    reader = easyocr.Reader(['en', 'ja'])
-    read_img = reader.readtext(img_bytes)
-
-    print(read_img)
-
-    return 200
+@main.route("/identify_card", methods=["POST"])
+def identify_card():
+    pass
