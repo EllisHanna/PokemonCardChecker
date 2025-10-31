@@ -72,4 +72,12 @@ def cards():
 
 @main.route("/ocr", methods=["POST"])
 def ocr():
-    file = request.files.get("image")
+    img = request.files.get("image")
+    img_bytes = img.read()
+
+    reader = easyocr.Reader(['en', 'ja'])
+    read_img = reader.readtext(img_bytes)
+
+    print(read_img)
+
+    return 200
