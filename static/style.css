@@ -25,7 +25,7 @@ html {
   color: var(--accent);
 }
 
-.plus-button {
+.plus-button, .camera-button{
   width: 30px;
   height: 30px;
   border-radius: 10px;
@@ -261,4 +261,44 @@ html {
   color: transparent;
   text-align: center;
   margin-bottom: 20px;
+}
+
+#camera-form input[type="file"] {
+  width: 80%;
+  margin: 0;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--secondary2);
+  color: var(--primary);
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+#camera-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+#camera-form label {
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+/* Nav */
+#nav{
+  background-color: var(--secondary);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#live-scan-img{
+  height: 60px;
+  width: 60px;
 }

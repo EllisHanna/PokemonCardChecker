@@ -28,6 +28,7 @@
         <h2>My Cards</h2>
         <div id="plus-delete-container">
           <button class="plus-button">+</button>
+          <button class="camera-button"><img id="bin-img" src="static/images/camera.png"></button>
           <button class="bin-button"><img id="bin-img" src="static/images/bin.png"></button>
         </div>
       </div>
@@ -80,6 +81,22 @@
           </form>
         </div>
       </div>
+    </div>
+
+    <div id="camera-modal" class="modal">
+  <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Scan Card</h2>
+      <form id="camera-form" method="POST" action="{{ url_for('main.ocr') }}" enctype="multipart/form-data">
+        <label for="card-image">Image:</label>
+        <input type="file" id="card-image" name="image" accept="image/*" capture="environment" required />
+        <button type="submit" class="submit-button">Upload</button>
+      </form>
+    </div>
+  </div>
+
+    <div id="nav">
+      <img id="live-scan-img" src="static/images/camera.png">
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
   </body>

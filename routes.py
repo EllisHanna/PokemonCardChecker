@@ -1,8 +1,12 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from models import db, PokemonCard
 import asyncio
+import easyocr
 from webscraper import webscrape
 import base64
+import cv2
+import numpy as np
+import re
 
 main = Blueprint("main", __name__)
 
@@ -18,8 +22,8 @@ def home():
 
 @main.route("/add_card", methods=["POST"])
 def add_card():
-    name = request.form.get("name")
-    number = request.form.get("number")
+    name = request.form.get("name") or request.args.get("name")
+    number = request.form.get("number") or request.args.get("number")
 
     name = name.capitalize()
 
@@ -66,9 +70,6 @@ def cards():
         } for c in cards
     ])
 
-@main.route("/delete_card/<int:card_id>", methods=["DELETE"])
-def delete_card(card_id):
-    card = PokemonCard.query.get_or_404(card_id)
-    db.session.delete(card)
-    db.session.commit()
-    return jsonify({"success": True})
+@main.route("/ocr", methods=["POST"])
+def ocr():
+    file = request.files.get("image")
