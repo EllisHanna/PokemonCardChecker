@@ -1,34 +1,32 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
-from models import db, PokemonCard
+from models import db, PokemonCard, WishlistCard
 import asyncio
 from webscraper import webscrape
 import base64
 
 main = Blueprint("main", __name__)
 
+@main.route("/")
 def home():
     cards = PokemonCard.query.order_by(PokemonCard.ungraded_price.desc()).all()
-    for card in cards:
-        if card.image:
-            card.image_base64 = base64.b64encode(card.image).decode("utf-8")
-        else:
-            card.image_base64 = None
-    return render_template("home.html", cards=cards)
+    wishlist = WishlistCard.query.order_by(WishlistCard.ungraded_price.desc()).all()
+
+    for c in cards + wishlist:
+        c.image_base64 = base64.b64encode(c.image).decode("utf-8") if c.image else None
+
+    return render_template("home.html", cards=cards, wishlist=wishlist)
 
 @main.route("/add_card", methods=["POST"])
 def add_card():
-    name = request.form.get("name") or request.args.get("name")
-    number = request.form.get("number") or request.args.get("number")
-
+    name = request.form.get("name")
+    number = request.form.get("number")
     name = name.capitalize()
-
     if not name or not number:
         return jsonify({"error": "Missing required fields: name and number"}), 400
 
     try:
         import re
         from decimal import Decimal
-
         def parse_price(price_str):
             if not price_str:
                 return None
@@ -43,28 +41,37 @@ def add_card():
         db.session.add(card)
         db.session.commit()
 
-        import base64
-        image_base64 = base64.b64encode(card.image).decode("utf-8")
-
         return redirect(url_for("main.home"))
-    
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-@main.route("/cards", methods=["GET"])
-def cards():
-    cards = PokemonCard.query.order_by(PokemonCard.ungraded_price.desc()).all()
-    return jsonify([
-        {
-            "id": c.id,
-            "name": c.name,
-            "number": c.number,
-            "ungraded_price": c.ungraded_price,
-            "graded_price": c.graded_price,
-            "created_at": c.created_at
-        } for c in cards
-    ])
 
-@main.route("/identify_card", methods=["POST"])
-def identify_card():
-    pass
+@main.route("/add_wishlist", methods=["POST"])
+def add_wishlist():
+    name = request.form.get("name")
+    number = request.form.get("number")
+    name = name.capitalize()
+    if not name or not number:
+        return jsonify({"error": "Missing fields"}), 400
+
+    try:
+        import re
+        from decimal import Decimal
+        def parse_price(p):
+            if not p:
+                return None
+            cleaned = re.sub(r"[^\d.]", "", str(p))
+            return Decimal(cleaned) if cleaned else None
+
+        ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
+        ungraded_price = parse_price(ungraded_price_raw)
+        graded_price = parse_price(graded_price_raw)
+
+        card = WishlistCard(name=name, number=number, ungraded_price=ungraded_price, graded_price=graded_price, image=img_bytes)
+        db.session.add(card)
+        db.session.commit()
+
+        return redirect(url_for("main.home"))
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

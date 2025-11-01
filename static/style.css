@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 :root {
   --primary: #f2f5f8;
@@ -25,7 +25,12 @@ html {
   color: var(--accent);
 }
 
-.plus-button, .camera-button{
+.highlight-blue {
+  color: var(--wishlist-blue);
+}
+
+.plus-button,
+.camera-button {
   width: 30px;
   height: 30px;
   border-radius: 10px;
@@ -33,7 +38,6 @@ html {
   border: none;
   display: flex;
   align-items: center;
-  text-align: center;
   justify-content: center;
   color: var(--primary);
 }
@@ -46,12 +50,10 @@ html {
   border: none;
   display: flex;
   align-items: center;
-  text-align: center;
   justify-content: center;
   color: var(--primary);
 }
 
-/* Top Page */
 #top-header {
   background-color: var(--secondary);
   display: flex;
@@ -78,7 +80,6 @@ html {
   color: transparent;
 }
 
-/* My Cards */
 #my-cards-header {
   border-bottom: solid 1px var(--secondary);
   margin: 30px;
@@ -104,19 +105,46 @@ html {
   color: transparent;
 }
 
-#plus-delete-container{
+#wishlist-header {
+  border-bottom: solid 1px var(--secondary);
+  margin: 30px;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#wishlist-header h2 {
+  font-family: "Press Start 2P", monospace;
+  background: linear-gradient(
+    to bottom,
+    #3b4cca 0%,
+    #3b4cca 45%,
+    #000000 45%,
+    #000000 55%,
+    #ffffff 55%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+#plus-delete-container {
   display: flex;
   flex-direction: row;
   gap: 10px;
 }
 
-#bin-img{
+#bin-img {
   height: 15px;
   width: 15px;
   object-fit: fill;
 }
 
-#my-cards-grid {
+#my-cards-grid,
+#wishlist-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(470px, 1fr));
   justify-content: center;
@@ -124,7 +152,6 @@ html {
   gap: 10px;
   padding: 20px;
   width: 100%;
-  min-height: 98vh;
 }
 
 .card {
@@ -168,7 +195,6 @@ html {
   gap: 10px;
 }
 
-/* Modal Window */
 .modal {
   display: none;
   position: fixed;
@@ -177,7 +203,7 @@ html {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(0, 0, 0, 0.6);
   justify-content: center;
   align-items: center;
 }
@@ -263,6 +289,26 @@ html {
   margin-bottom: 20px;
 }
 
+#add-wishlist-modal h2 {
+  font-family: "Press Start 2P", monospace;
+  font-size: 20px;
+  background: linear-gradient(
+    to bottom,
+    var(--wishlist-blue) 0%,
+    var(--wishlist-blue) 45%,
+    #000000 45%,
+    #000000 55%,
+    #ffffff 55%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
 #camera-form input[type="file"] {
   width: 80%;
   margin: 0;
@@ -290,15 +336,14 @@ html {
   text-align: center;
 }
 
-/* Nav */
-#nav{
+#nav {
   background-color: var(--secondary);
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-#live-scan-img{
+#live-scan-img {
   height: 60px;
   width: 60px;
 }

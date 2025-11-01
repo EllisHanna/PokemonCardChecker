@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 
-db:SQLAlchemy = SQLAlchemy()
+db: SQLAlchemy = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -12,12 +12,21 @@ class User(UserMixin, db.Model):
 
     def get_id(self):
         return str(self.id)
-    
+
 class PokemonCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.LargeBinary)
     name = db.Column(db.String(100), nullable=False)
     number = db.Column(db.String(20), nullable=False)
-    ungraded_price = db.Column(db.Numeric(10,2))
-    graded_price = db.Column(db.Numeric(10,2))
+    ungraded_price = db.Column(db.Numeric(10, 2))
+    graded_price = db.Column(db.Numeric(10, 2))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+class WishlistCard(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image = db.Column(db.LargeBinary)
+    name = db.Column(db.String(100), nullable=False)
+    number = db.Column(db.String(20), nullable=False)
+    ungraded_price = db.Column(db.Numeric(10, 2))
+    graded_price = db.Column(db.Numeric(10, 2))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
