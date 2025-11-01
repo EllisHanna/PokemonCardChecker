@@ -3,6 +3,7 @@ from models import db, PokemonCard, WishlistCard
 import asyncio
 from webscraper import webscrape
 import base64
+from decimal import Decimal
 
 main = Blueprint("main", __name__)
 
@@ -14,7 +15,10 @@ def home():
     for c in cards + wishlist:
         c.image_base64 = base64.b64encode(c.image).decode("utf-8") if c.image else None
 
-    return render_template("home.html", cards=cards, wishlist=wishlist)
+    ungraded_total = sum(c.ungraded_price or Decimal(0) for c in cards)
+    graded_total = sum(c.graded_price or Decimal(0) for c in cards)
+
+    return render_template("home.html", cards=cards, wishlist=wishlist, ungraded_total=ungraded_total, graded_total=graded_total)
 
 @main.route("/add_card", methods=["POST"])
 def add_card():

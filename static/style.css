@@ -21,12 +21,12 @@ html {
   overflow-x: hidden;
 }
 
-.highlight-accent {
-  color: var(--accent);
+body {
+  padding-bottom: 80px;
 }
 
-.highlight-blue {
-  color: var(--wishlist-blue);
+.highlight-accent {
+  color: var(--accent);
 }
 
 .plus-button,
@@ -40,6 +40,31 @@ html {
   align-items: center;
   justify-content: center;
   color: var(--primary);
+}
+
+.live-scan-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  background-color: var(--secondary2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.small {
+  font-size: 10px;
 }
 
 .bin-button {
@@ -80,7 +105,8 @@ html {
   color: transparent;
 }
 
-#my-cards-header {
+#my-cards-header,
+#wishlist-header {
   border-bottom: solid 1px var(--secondary);
   margin: 30px;
   padding: 10px;
@@ -102,20 +128,9 @@ html {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: transparent;
-}
-
-#wishlist-header {
-  border-bottom: solid 1px var(--secondary);
-  margin: 30px;
-  padding: 10px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
 }
 
 #wishlist-header h2 {
-  font-family: "Press Start 2P", monospace;
   background: linear-gradient(
     to bottom,
     #3b4cca 0%,
@@ -128,7 +143,6 @@ html {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: transparent;
 }
 
 #plus-delete-container {
@@ -269,81 +283,39 @@ html {
   color: var(--primary);
 }
 
-#add-card-modal h2 {
-  font-family: "Press Start 2P", monospace;
-  font-size: 20px;
-  background: linear-gradient(
-    to bottom,
-    #ffdd00 0%,
-    #ffdd00 45%,
-    #000000 45%,
-    #000000 55%,
-    #ffffff 55%,
-    #ffffff 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#add-wishlist-modal h2 {
-  font-family: "Press Start 2P", monospace;
-  font-size: 20px;
-  background: linear-gradient(
-    to bottom,
-    var(--wishlist-blue) 0%,
-    var(--wishlist-blue) 45%,
-    #000000 45%,
-    #000000 55%,
-    #ffffff 55%,
-    #ffffff 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#camera-form input[type="file"] {
-  width: 80%;
-  margin: 0;
-  padding: 8px;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--secondary2);
-  color: var(--primary);
-  font-family: "Press Start 2P", monospace;
-  font-size: 8px;
-  text-align: center;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-#camera-form {
+#my-cards-totals,
+#wishlist-totals {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-evenly;
   align-items: center;
-  gap: 15px;
+  padding: 20px;
+  margin: 50px;
+  background-color: var(--secondary);
+  border-top: 1px solid var(--secondary2);
+  font-family: "Press Start 2P", monospace;
 }
 
-#camera-form label {
-  margin-bottom: 5px;
+.total-item {
   text-align: center;
 }
 
 #nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   background-color: var(--secondary);
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 10px 0;
+  z-index: 100;
+  border-top: 1px solid var(--secondary2);
 }
 
 #live-scan-img {
-  height: 60px;
-  width: 60px;
+  height: 40px;
+  width: 40px;
 }

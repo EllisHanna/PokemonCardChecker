@@ -35,6 +35,7 @@
           </button>
         </div>
       </div>
+
       <div id="my-cards-grid">
         {% for card in cards %}
         <div class="card">
@@ -66,6 +67,35 @@
         {% endfor %}
       </div>
 
+      <div id="my-cards-totals">
+        <div class="total-item">
+          <p>
+            Ungraded Total:
+            <span class="highlight-accent">
+              £{{
+                cards
+                | map(attribute='ungraded_price')
+                | select
+                | sum(start=0)
+              }}
+            </span>
+          </p>
+        </div>
+        <div class="total-item">
+          <p>
+            Graded Total:
+            <span class="highlight-accent">
+              £{{
+                cards
+                | map(attribute='graded_price')
+                | select
+                | sum(start=0)
+              }}
+            </span>
+          </p>
+        </div>
+      </div>
+
       <div id="add-card-modal" class="modal">
         <div class="modal-content">
           <span class="close-button">&times;</span>
@@ -95,6 +125,7 @@
           </button>
         </div>
       </div>
+
       <div id="wishlist-grid">
         {% for card in wishlist %}
         <div class="card">
@@ -113,17 +144,46 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-blue">£{{ card.ungraded_price }}</span>
+                <span class="highlight-accent">£{{ card.ungraded_price }}</span>
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-blue">£{{ card.graded_price }}</span>
+                <span class="highlight-accent">£{{ card.graded_price }}</span>
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
           </div>
         </div>
         {% endfor %}
+      </div>
+
+      <div id="wishlist-totals">
+        <div class="total-item">
+          <p>
+            Ungraded Total:
+            <span class="highlight-accent">
+              £{{
+                wishlist
+                | map(attribute='ungraded_price')
+                | select
+                | sum(start=0)
+              }}
+            </span>
+          </p>
+        </div>
+        <div class="total-item">
+          <p>
+            Graded Total:
+            <span class="highlight-accent">
+              £{{
+                wishlist
+                | map(attribute='graded_price')
+                | select
+                | sum(start=0)
+              }}
+            </span>
+          </p>
+        </div>
       </div>
 
       <div id="add-wishlist-modal" class="modal">
@@ -146,7 +206,36 @@
     </div>
 
     <div id="nav">
-      <img id="live-scan-img" src="static/images/camera.png" />
+      <div class="center">
+        <button class="live-scan-button">
+          <img id="live-scan-img" src="static/images/camera.png" />
+        </button>
+        <p class="small">Live Scan</p>
+      </div>
+    </div>
+
+    <div id="camera-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Scan Card</h2>
+        <form
+          id="camera-form"
+          method="POST"
+          action="{{ url_for('main.add_card') }}"
+          enctype="multipart/form-data"
+        >
+          <label for="camera-input">Upload Card</label>
+          <input
+            type="file"
+            id="camera-input"
+            name="image"
+            accept="image/*"
+            capture="camera"
+            required
+          />
+          <button type="submit" class="submit-button">Add Card</button>
+        </form>
+      </div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

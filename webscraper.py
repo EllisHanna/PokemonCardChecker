@@ -25,16 +25,16 @@ async def get_grade_10(page):
     graded_container = page.locator("#legend-container")
     psa_label = graded_container.locator("text=PSA 10")
     if not await psa_label.count():
-        return ""
+        return " "
     graded_price = psa_label.locator("xpath=./following-sibling::*[1] | ../*[contains(., '£')]")
     try:
         graded_price_text = await graded_price.text_content()
         if graded_price_text:
             graded_price_text = graded_price_text.strip("() \n")
         else:
-            graded_price_text = ""
+            graded_price_text = " "
     except Exception:
-        graded_price_text = ""
+        graded_price_text = " "
     print(graded_price_text)
     return graded_price_text
 
