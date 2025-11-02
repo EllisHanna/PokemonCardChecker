@@ -79,3 +79,7 @@ def add_wishlist():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@main.route("/scan_card", methods=["POST"])
+def scan_card():
+    pass
