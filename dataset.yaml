@@ -1,0 +1,5 @@
+train: C:/Users/Billy/Documents/GitHub/PokemonCardChecker/dataset/images/train
+val: C:/Users/Billy/Documents/GitHub/PokemonCardChecker/dataset/images/train
+
+nc: 2
+names: ["number", "name"]
