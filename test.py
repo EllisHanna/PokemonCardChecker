@@ -1,9 +1,9 @@
 from ultralytics import YOLO
 import cv2
 
-model = YOLO(r"C:\Users\Billy\Documents\GitHub\PokemonCardChecker\runs\detect\pokemon_card_detector\weights\best.pt")
+model = YOLO(r"C:\Users\Ellis Hanna\Documents\GitHub\PokemonCardChecker\runs\detect\pokemon_card_detector\weights\best.pt")
 
-image_path = r"C:\Users\Billy\Documents\GitHub\PokemonCardChecker\dataset\images\train\test.jpg"
+image_path = r"C:\Users\Ellis Hanna\Documents\GitHub\PokemonCardChecker\dataset\images\train\test.jpg"
 results = model(image_path, conf=0.05, imgsz=640)
 
 class_colors = {"name": (0, 255, 0), "number": (0, 0, 255)}
