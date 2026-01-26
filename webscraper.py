@@ -9,12 +9,25 @@ async def change_currency(page, start, end):
     await currency.click()
 
 async def search_card(page, name, number):
+    import re
+
     search_bar = page.locator("input").first
     await search_bar.fill(f"{name} {number}")
+
     search_button = page.get_by_role("button", name="Search")
     await search_button.click()
-    result = page.locator("h3").filter(has_text=f"{name[0].upper()}{name[1:]}").first
-    await result.click()
+
+    await page.wait_for_selector("h3")
+
+    pattern = re.compile(name, re.IGNORECASE)
+    results = page.locator("h3").filter(has_text=pattern)
+
+    count = await results.count()
+    if count == 0:
+        raise ValueError(f"No results found for: {name} {number}")
+
+    await results.first.click()
+
 
 async def get_ungraded(page):
     ungraded_price = page.locator("span").filter(has_text="£").first
