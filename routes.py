@@ -4,8 +4,7 @@ import asyncio
 from webscraper import webscrape
 import base64
 from decimal import Decimal
-import os
-import tempfile
+import re
 
 main = Blueprint("main", __name__)
 
@@ -19,6 +18,12 @@ def home():
     graded_total = sum(c.graded_price or Decimal(0) for c in cards)
     return render_template("home.html", cards=cards, wishlist=wishlist, ungraded_total=ungraded_total, graded_total=graded_total)
 
+def parse_price(price_str):
+    if not price_str:
+        return None
+    cleaned = re.sub(r"[^\d.]", "", str(price_str))
+    return Decimal(cleaned) if cleaned else None
+
 @main.route("/add_card", methods=["POST"])
 def add_card():
     name = request.form.get("name")
@@ -27,12 +32,6 @@ def add_card():
     if not name or not number:
         return jsonify({"error": "Missing required fields: name and number"}), 400
     try:
-        import re
-        def parse_price(price_str):
-            if not price_str:
-                return None
-            cleaned = re.sub(r"[^\d.]", "", str(price_str))
-            return Decimal(cleaned) if cleaned else None
         ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
         ungraded_price = parse_price(ungraded_price_raw)
         graded_price = parse_price(graded_price_raw)
@@ -51,12 +50,6 @@ def add_wishlist():
     if not name or not number:
         return jsonify({"error": "Missing fields"}), 400
     try:
-        import re
-        def parse_price(p):
-            if not p:
-                return None
-            cleaned = re.sub(r"[^\d.]", "", str(p))
-            return Decimal(cleaned) if cleaned else None
         ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
         ungraded_price = parse_price(ungraded_price_raw)
         graded_price = parse_price(graded_price_raw)
