@@ -59,6 +59,20 @@ def add_wishlist():
         return redirect(url_for("main.home"))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@main.route("/delete_card/card/<int:card_id>", methods=["DELETE"])
+def delete_card(card_id):
+    card = PokemonCard.query.get_or_404(card_id)
+    db.session.delete(card)
+    db.session.commit()
+    return "", 204
+
+@main.route("/delete_card/wishlist/<int:card_id>", methods=["DELETE"])
+def delete_wishlist(card_id):
+    card = WishlistCard.query.get_or_404(card_id)
+    db.session.delete(card)
+    db.session.commit()
+    return "", 204
 
 @main.route("/scan_card", methods=["POST"])
 def scan_card():

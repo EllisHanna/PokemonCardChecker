@@ -319,3 +319,33 @@ body {
   height: 40px;
   width: 40px;
 }
+
+body.delete-mode .card {
+  cursor: pointer;
+  outline: 2px solid red;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+body.delete-mode .card:hover {
+  background-color: #ff4d4d;
+  opacity: 0.85;
+}
+
+#my-cards-section,
+#wishlist-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 650px;
+}
+
+#my-cards-grid,
+#wishlist-grid {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(470px, 1fr));
+  justify-content: center;
+  grid-auto-rows: 300px;
+  gap: 10px;
+  padding: 20px;
+  width: 100%;
+}

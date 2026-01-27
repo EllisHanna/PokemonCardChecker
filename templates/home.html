@@ -30,7 +30,7 @@
           <button class="camera-button">
             <img id="bin-img" src="static/images/camera.png" />
           </button>
-          <button class="bin-button">
+          <button class="bin-button" id="delete-toggle">
             <img id="bin-img" src="static/images/bin.png" />
           </button>
         </div>
@@ -38,7 +38,7 @@
 
       <div id="my-cards-grid">
         {% for card in cards %}
-        <div class="card">
+        <div class="card" data-id="{{ card.id }}" data-type="card">
           {% if card.image_base64 %}
           <img
             class="card-img"
@@ -54,11 +54,11 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-accent">£{{ card.ungraded_price }}</span>
+                <span class="highlight-accent ungraded-price">£{{ card.ungraded_price }}</span>
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-accent">£{{ card.graded_price }}</span>
+                <span class="highlight-accent graded-price">£{{ card.graded_price }}</span>
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
@@ -71,27 +71,13 @@
         <div class="total-item">
           <p>
             Ungraded Total:
-            <span class="highlight-accent">
-              £{{
-                cards
-                | map(attribute='ungraded_price')
-                | select
-                | sum(start=0)
-              }}
-            </span>
+            <span id="ungraded-total" class="highlight-accent">£{{ ungraded_total }}</span>
           </p>
         </div>
         <div class="total-item">
           <p>
             Graded Total:
-            <span class="highlight-accent">
-              £{{
-                cards
-                | map(attribute='graded_price')
-                | select
-                | sum(start=0)
-              }}
-            </span>
+            <span id="graded-total" class="highlight-accent">£{{ graded_total }}</span>
           </p>
         </div>
       </div>
@@ -120,7 +106,7 @@
         <h2>Wishlist</h2>
         <div id="plus-delete-container">
           <button class="plus-button" id="add-wishlist-open">+</button>
-          <button class="bin-button">
+          <button class="bin-button" id="wishlist-delete-toggle">
             <img id="bin-img" src="static/images/bin.png" />
           </button>
         </div>
@@ -128,7 +114,7 @@
 
       <div id="wishlist-grid">
         {% for card in wishlist %}
-        <div class="card">
+        <div class="card" data-id="{{ card.id }}" data-type="wishlist">
           {% if card.image_base64 %}
           <img
             class="card-img"
@@ -144,11 +130,11 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-accent">£{{ card.ungraded_price }}</span>
+                <span class="highlight-accent ungraded-price">£{{ card.ungraded_price }}</span>
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-accent">£{{ card.graded_price }}</span>
+                <span class="highlight-accent graded-price">£{{ card.graded_price }}</span>
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
@@ -161,26 +147,16 @@
         <div class="total-item">
           <p>
             Ungraded Total:
-            <span class="highlight-accent">
-              £{{
-                wishlist
-                | map(attribute='ungraded_price')
-                | select
-                | sum(start=0)
-              }}
+            <span id="wishlist-ungraded-total" class="highlight-accent">
+              £{{ wishlist | map(attribute='ungraded_price') | select | sum(start=0) }}
             </span>
           </p>
         </div>
         <div class="total-item">
           <p>
             Graded Total:
-            <span class="highlight-accent">
-              £{{
-                wishlist
-                | map(attribute='graded_price')
-                | select
-                | sum(start=0)
-              }}
+            <span id="wishlist-graded-total" class="highlight-accent">
+              £{{ wishlist | map(attribute='graded_price') | select | sum(start=0) }}
             </span>
           </p>
         </div>
