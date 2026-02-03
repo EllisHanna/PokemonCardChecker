@@ -5,8 +5,30 @@ from webscraper import webscrape
 import base64
 from decimal import Decimal
 import re
+from PIL import Image
+import imagehash
+import io
+import json
 
 main = Blueprint("main", __name__)
+with open("card_hashes.json", "r") as f:
+    HASH_DB = json.load(f)
+
+def find_best_card(image_bytes):
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    target_hash = imagehash.phash(img)
+
+    best = None
+    best_dist = 999
+
+    for card in HASH_DB:
+        h = imagehash.hex_to_hash(card["hash"])
+        dist = target_hash - h
+        if dist < best_dist:
+            best_dist = dist
+            best = card
+
+    return best, best_dist
 
 @main.route("/")
 def home():
@@ -76,4 +98,43 @@ def delete_wishlist(card_id):
 
 @main.route("/scan_card", methods=["POST"])
 def scan_card():
-    pass
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    image_bytes = request.files["image"].read()
+
+    best, dist = find_best_card(image_bytes)
+
+    if not best or dist > 12:
+        return jsonify({
+            "error": "Card not confidently recognised",
+            "distance": dist
+        }), 400
+
+    name = best["name"].capitalize()
+    number = best["number"]
+
+    try:
+        ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(
+            webscrape(name, number)
+        )
+
+        ungraded_price = parse_price(ungraded_price_raw)
+        graded_price = parse_price(graded_price_raw)
+
+        card = PokemonCard(
+            name=name,
+            number=number,
+            ungraded_price=ungraded_price,
+            graded_price=graded_price,
+            image=img_bytes
+        )
+
+        db.session.add(card)
+        db.session.commit()
+
+        return redirect(url_for("main.home"))
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
