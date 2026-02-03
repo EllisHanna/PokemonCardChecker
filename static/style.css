@@ -349,3 +349,22 @@ body.delete-mode .card:hover {
   padding: 20px;
   width: 100%;
 }
+
+#camera-input {
+  display: none;
+}
+
+.file-upload-label {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: var(--secondary);
+  font-family: "Press Start 2P", monospace;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.file-upload-label:hover {
+  opacity: 0.9;
+}

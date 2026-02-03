@@ -194,13 +194,8 @@
       <div class="modal-content">
         <span class="close-button">&times;</span>
         <h2>Scan Card</h2>
-        <form
-          id="camera-form"
-          method="POST"
-          action="{{ url_for('main.scan_card') }}"
-          enctype="multipart/form-data"
-        >
-          <label for="camera-input">Upload Card</label>
+        <form id="camera-form" method="POST" action="{{ url_for('main.scan_card') }}" enctype="multipart/form-data">
+          <label for="camera-input" class="file-upload-label">Upload Card</label>
           <input
             type="file"
             id="camera-input"
