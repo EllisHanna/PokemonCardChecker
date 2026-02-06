@@ -1,4 +1,5 @@
 # PokemonCardChecker
+![Home Page](assets/home.png)
 
 A full‑stack web application that allows users to manage a Pokémon card collection, scan cards using a phone camera, and retrieve live market prices in real time.
 
@@ -123,7 +124,7 @@ It was built to solve a real personal use case by combining two hobbies: **softw
 
 ## Author
 
-Billy
+Ellis Hanna
 
 ---
 
