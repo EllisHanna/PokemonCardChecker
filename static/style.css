@@ -323,7 +323,9 @@ body {
 body.delete-mode .card {
   cursor: pointer;
   outline: 2px solid red;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
 }
 
 body.delete-mode .card:hover {
@@ -367,4 +369,20 @@ body.delete-mode .card:hover {
 
 .file-upload-label:hover {
   opacity: 0.9;
+}
+
+#match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.match-option {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.match-option:hover {
+  background: #eee;
 }

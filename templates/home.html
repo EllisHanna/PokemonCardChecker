@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -54,11 +54,15 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-accent ungraded-price">£{{ card.ungraded_price }}</span>
+                <span class="highlight-accent ungraded-price"
+                  >£{{ card.ungraded_price }}</span
+                >
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-accent graded-price">£{{ card.graded_price }}</span>
+                <span class="highlight-accent graded-price"
+                  >£{{ card.graded_price }}</span
+                >
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
@@ -71,13 +75,17 @@
         <div class="total-item">
           <p>
             Ungraded Total:
-            <span id="ungraded-total" class="highlight-accent">£{{ ungraded_total }}</span>
+            <span id="ungraded-total" class="highlight-accent"
+              >£{{ ungraded_total }}</span
+            >
           </p>
         </div>
         <div class="total-item">
           <p>
             Graded Total:
-            <span id="graded-total" class="highlight-accent">£{{ graded_total }}</span>
+            <span id="graded-total" class="highlight-accent"
+              >£{{ graded_total }}</span
+            >
           </p>
         </div>
       </div>
@@ -130,11 +138,15 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-accent ungraded-price">£{{ card.ungraded_price }}</span>
+                <span class="highlight-accent ungraded-price"
+                  >£{{ card.ungraded_price }}</span
+                >
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-accent graded-price">£{{ card.graded_price }}</span>
+                <span class="highlight-accent graded-price"
+                  >£{{ card.graded_price }}</span
+                >
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
@@ -148,7 +160,8 @@
           <p>
             Ungraded Total:
             <span id="wishlist-ungraded-total" class="highlight-accent">
-              £{{ wishlist | map(attribute='ungraded_price') | select | sum(start=0) }}
+              £{{ wishlist | map(attribute='ungraded_price') | select |
+              sum(start=0) }}
             </span>
           </p>
         </div>
@@ -156,7 +169,8 @@
           <p>
             Graded Total:
             <span id="wishlist-graded-total" class="highlight-accent">
-              £{{ wishlist | map(attribute='graded_price') | select | sum(start=0) }}
+              £{{ wishlist | map(attribute='graded_price') | select |
+              sum(start=0) }}
             </span>
           </p>
         </div>
@@ -194,8 +208,15 @@
       <div class="modal-content">
         <span class="close-button">&times;</span>
         <h2>Scan Card</h2>
-        <form id="camera-form" method="POST" action="{{ url_for('main.scan_card') }}" enctype="multipart/form-data">
-          <label for="camera-input" class="file-upload-label">Upload Card</label>
+        <form
+          id="camera-form"
+          method="POST"
+          action="{{ url_for('main.scan_card') }}"
+          enctype="multipart/form-data"
+        >
+          <label for="camera-input" class="file-upload-label"
+            >Upload Card</label
+          >
           <input
             type="file"
             id="camera-input"
@@ -206,6 +227,14 @@
           />
           <button type="submit" class="submit-button">Add Card</button>
         </form>
+      </div>
+    </div>
+
+    <div id="match-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3>Select the correct card</h3>
+        <div id="match-list"></div>
       </div>
     </div>
 
