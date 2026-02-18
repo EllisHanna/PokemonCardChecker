@@ -51,8 +51,7 @@ document.querySelectorAll(".card").forEach((card) => {
     const cardId = card.dataset.id;
     const type = card.dataset.type;
 
-    const ungraded = parsePrice(card.querySelector(".ungraded-price")?.textContent);
-    const graded = parsePrice(card.querySelector(".graded-price")?.textContent);
+    const myPrice = parsePrice(card.querySelector(".my-price")?.textContent);
 
     const res = await fetch(`/delete_card/${type}/${cardId}`, {
       method: "DELETE",
@@ -60,18 +59,10 @@ document.querySelectorAll(".card").forEach((card) => {
 
     if (res.ok) {
       card.remove();
-
-      const ungradedTotalEl = document.getElementById("ungraded-total");
-      const gradedTotalEl = document.getElementById("graded-total");
-
-      if (ungradedTotalEl)
-        ungradedTotalEl.textContent = `£${(
-          parsePrice(ungradedTotalEl.textContent) - ungraded
-        ).toFixed(2)}`;
-
-      if (gradedTotalEl)
-        gradedTotalEl.textContent = `£${(
-          parsePrice(gradedTotalEl.textContent) - graded
+      const totalEl = document.getElementById("my-total");
+      if (totalEl)
+        totalEl.textContent = `£${(
+          parsePrice(totalEl.textContent) - myPrice
         ).toFixed(2)}`;
     }
   });

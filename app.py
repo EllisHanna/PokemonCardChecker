@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from flask_cors import CORS
 from models import db, User
 from routes import main
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 
@@ -10,6 +11,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SECRET_KEY'] = "SECRET_KEY"
 
 db.init_app(app)
+migrate = Migrate(app, db)
+
 CORS(app)
 
 login_manager = LoginManager()
