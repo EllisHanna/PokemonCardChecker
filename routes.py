@@ -5,30 +5,84 @@ from webscraper import webscrape
 import base64
 from decimal import Decimal
 import re
-from PIL import Image
+from PIL import Image, ImageFilter
 import imagehash
 import io
 import json
+import cv2
+import numpy as np
 
 main = Blueprint("main", __name__)
+
 with open("card_hashes.json", "r") as f:
     HASH_DB = json.load(f)
 
-def find_best_card(image_bytes):
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    target_hash = imagehash.phash(img)
+CONFIDENT_MAX = 8
+UNCERTAIN_MAX = 20
+TOP_K = 5
 
-    best = None
-    best_dist = 999
+def order_points(pts):
+    rect = np.zeros((4, 2), dtype="float32")
+    s = pts.sum(axis=1)
+    rect[0] = pts[np.argmin(s)]
+    rect[2] = pts[np.argmax(s)]
+    diff = np.diff(pts, axis=1)
+    rect[1] = pts[np.argmin(diff)]
+    rect[3] = pts[np.argmax(diff)]
+    return rect
 
-    for card in HASH_DB:
-        h = imagehash.hex_to_hash(card["hash"])
-        dist = target_hash - h
-        if dist < best_dist:
-            best_dist = dist
-            best = card
+def extract_card_candidates(image_bytes):
+    img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (7, 7), 0)
+    edges = cv2.Canny(blur, 50, 150)
 
-    return best, best_dist
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+    cards = []
+
+    for c in contours:
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+        if len(approx) == 4:
+            pts = approx.reshape(4, 2)
+            rect = order_points(pts)
+            w, h = 512, 712
+            dst = np.array([[0, 0], [w, 0], [w, h], [0, h]], dtype="float32")
+            M = cv2.getPerspectiveTransform(rect, dst)
+            warped = cv2.warpPerspective(img, M, (w, h))
+            cards.append(warped)
+
+    if not cards:
+        cards.append(cv2.resize(img, (512, 712)))
+
+    return cards
+
+def phash_image(np_img):
+    img = Image.fromarray(cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB))
+    img = img.resize((512, 712))
+    img = img.filter(ImageFilter.GaussianBlur(1))
+    return imagehash.phash(img)
+
+def find_top_matches(image_bytes):
+    candidates = extract_card_candidates(image_bytes)
+    results = []
+
+    for candidate in candidates:
+        target_hash = phash_image(candidate)
+        for card in HASH_DB:
+            h = imagehash.hex_to_hash(card["hash"])
+            dist = target_hash - h
+            results.append({
+                "name": card["name"],
+                "number": card["number"],
+                "set": card.get("set"),
+                "distance": dist
+            })
+
+    results.sort(key=lambda x: x["distance"])
+    return results[:TOP_K]
 
 @main.route("/")
 def home():
@@ -82,7 +136,7 @@ def add_wishlist():
         return redirect(url_for("main.home"))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @main.route("/delete_card/card/<int:card_id>", methods=["DELETE"])
 def delete_card(card_id):
     card = PokemonCard.query.get_or_404(card_id)
@@ -104,14 +158,13 @@ def scan_card():
 
     grade = request.form.get("grade", "Raw")
     image_bytes = request.files["image"].read()
-
-    best, dist = find_best_card(image_bytes)
+    matches = find_top_matches(image_bytes)
 
     if not best or dist > 12:
-        return jsonify({"error": "Card not confidently recognised", "distance": dist}), 400
-
-    name = best["name"].capitalize()
-    number = best["number"]
+        return jsonify({
+            "error": "Card not confidently recognised",
+            "distance": dist
+        }), 400
 
     try:
         ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
@@ -126,12 +179,4 @@ def scan_card():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-@main.route("/set_grade/<int:card_id>", methods=["POST"])
-def set_grade(card_id):
-    card = PokemonCard.query.get_or_404(card_id)
-    grade = request.form.get("grade", "Raw")
-    card.my_grade = grade
-    card.my_price = card.ungraded_price if grade == "Raw" else card.graded_price
-    db.session.commit()
-    return redirect(url_for("main.home"))
+

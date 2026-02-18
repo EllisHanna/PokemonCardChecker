@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -53,12 +53,16 @@
             </div>
             <div class="card-desc">
               <p>
-                Raw Price:
-                <span class="highlight-accent">£{{ card.ungraded_price }}</span>
+                Ungraded Price:
+                <span class="highlight-accent ungraded-price"
+                  >£{{ card.ungraded_price }}</span
+                >
               </p>
               <p>
-                PSA10 Price:
-                <span class="highlight-accent">£{{ card.graded_price }}</span>
+                Graded Price:
+                <span class="highlight-accent graded-price"
+                  >£{{ card.graded_price }}</span
+                >
               </p>
 
               <form method="POST" action="{{ url_for('main.set_grade', card_id=card.id) }}">
@@ -138,12 +142,16 @@
             </div>
             <div class="card-desc">
               <p>
-                Raw Price:
-                <span class="highlight-accent">£{{ card.ungraded_price }}</span>
+                Ungraded Price:
+                <span class="highlight-accent ungraded-price"
+                  >£{{ card.ungraded_price }}</span
+                >
               </p>
               <p>
-                PSA10 Price:
-                <span class="highlight-accent">£{{ card.graded_price }}</span>
+                Graded Price:
+                <span class="highlight-accent graded-price"
+                  >£{{ card.graded_price }}</span
+                >
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
@@ -155,13 +163,12 @@
       <div id="wishlist-totals">
         <div class="total-item">
           <p>
-            Wishlist Raw Total:
+            Wishlist Total:
             <span class="highlight-accent">
               £{{ wishlist | map(attribute='ungraded_price') | select | sum(start=0) }}
             </span>
           </p>
         </div>
-      </div>
 
       <div id="add-wishlist-modal" class="modal">
         <div class="modal-content">
@@ -195,8 +202,15 @@
       <div class="modal-content">
         <span class="close-button">&times;</span>
         <h2>Scan Card</h2>
-        <form id="camera-form" method="POST" action="{{ url_for('main.scan_card') }}" enctype="multipart/form-data">
-          <label for="camera-input" class="file-upload-label">Upload Card</label>
+        <form
+          id="camera-form"
+          method="POST"
+          action="{{ url_for('main.scan_card') }}"
+          enctype="multipart/form-data"
+        >
+          <label for="camera-input" class="file-upload-label"
+            >Upload Card</label
+          >
           <input
             type="file"
             id="camera-input"
@@ -207,6 +221,14 @@
           />
           <button type="submit" class="submit-button">Add Card</button>
         </form>
+      </div>
+    </div>
+
+    <div id="match-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3>Select the correct card</h3>
+        <div id="match-list"></div>
       </div>
     </div>
 
