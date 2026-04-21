@@ -17,9 +17,9 @@ main = Blueprint("main", __name__)
 with open("card_hashes.json", "r") as f:
     HASH_DB = json.load(f)
 
-CONFIDENT_MAX = 8
-UNCERTAIN_MAX = 20
+CONFIDENT_MAX = 25
 TOP_K = 5
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 def order_points(pts):
     rect = np.zeros((4, 2), dtype="float32")
@@ -34,14 +34,13 @@ def order_points(pts):
 def extract_card_candidates(image_bytes):
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (7, 7), 0)
-    edges = cv2.Canny(blur, 50, 150)
-
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blur, 75, 200)
+    kernel = np.ones((3, 3), np.uint8)
+    edges = cv2.dilate(edges, kernel, iterations=1)
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
-
     cards = []
-
     for c in contours:
         peri = cv2.arcLength(c, True)
         approx = cv2.approxPolyDP(c, 0.02 * peri, True)
@@ -53,27 +52,34 @@ def extract_card_candidates(image_bytes):
             M = cv2.getPerspectiveTransform(rect, dst)
             warped = cv2.warpPerspective(img, M, (w, h))
             cards.append(warped)
-
     if not cards:
         cards.append(cv2.resize(img, (512, 712)))
-
     return cards
 
-def phash_image(np_img):
-    img = Image.fromarray(cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB))
-    img = img.resize((512, 712))
-    img = img.filter(ImageFilter.GaussianBlur(1))
-    return imagehash.phash(img)
+def hash_image(np_img):
+    img_rgb = cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB)
+    img = Image.fromarray(img_rgb)
+
+    ph = imagehash.phash(img, hash_size=16)
+    dh = imagehash.dhash(img, hash_size=16)
+    ah = imagehash.average_hash(img, hash_size=16)
+
+    return ph, dh, ah
 
 def find_top_matches(image_bytes):
     candidates = extract_card_candidates(image_bytes)
     results = []
 
     for candidate in candidates:
-        target_hash = phash_image(candidate)
+        ph, dh, ah = hash_image(candidate)
+
         for card in HASH_DB:
-            h = imagehash.hex_to_hash(card["hash"])
-            dist = target_hash - h
+            ph_db = imagehash.hex_to_hash(card["phash"])
+            dh_db = imagehash.hex_to_hash(card["dhash"])
+            ah_db = imagehash.hex_to_hash(card["ahash"])
+
+            dist = (ph - ph_db) + (dh - dh_db) + (ah - ah_db)
+
             results.append({
                 "name": card["name"],
                 "number": card["number"],
@@ -104,9 +110,9 @@ def add_card():
     name = request.form.get("name")
     number = request.form.get("number")
     grade = request.form.get("grade", "Raw")
-    name = name.capitalize()
+    name = name.capitalize() if name else ""
     if not name or not number:
-        return jsonify({"error": "Missing required fields: name and number"}), 400
+        return jsonify({"error": "Missing required fields"}), 400
     try:
         ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
         ungraded_price = parse_price(ungraded_price_raw)
@@ -123,7 +129,7 @@ def add_card():
 def add_wishlist():
     name = request.form.get("name")
     number = request.form.get("number")
-    name = name.capitalize()
+    name = name.capitalize() if name else ""
     if not name or not number:
         return jsonify({"error": "Missing fields"}), 400
     try:
@@ -136,6 +142,46 @@ def add_wishlist():
         return redirect(url_for("main.home"))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@main.route("/scan_card", methods=["POST"])
+def scan_card():
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+    grade = request.form.get("grade", "Raw")
+    image_bytes = request.files["image"].read()
+    matches = find_top_matches(image_bytes)
+    if not matches:
+        return jsonify({"error": "No matches found"}), 400
+    best = matches[0]
+
+    print("==== DEBUG MATCHES ====")
+    for m in matches[:5]:
+        print(m)
+
+    name, number = best["name"], best["number"]
+    print("TOP MATCHES:", matches[:5])
+    try:
+        ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
+        ungraded_price = parse_price(ungraded_price_raw)
+        graded_price = parse_price(graded_price_raw)
+        my_price = ungraded_price if grade == "Raw" else graded_price
+        card = PokemonCard(name=name, number=number, ungraded_price=ungraded_price, graded_price=graded_price, my_grade=grade, my_price=my_price, image=img_bytes)
+        db.session.add(card)
+        db.session.commit()
+        print("TOP MATCHES:", matches[:5])
+        return redirect(url_for("main.home"))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@main.route("/set_grade/<int:card_id>", methods=["POST"])
+def set_grade(card_id):
+    card = PokemonCard.query.get_or_404(card_id)
+    new_grade = request.form.get("grade")
+    if new_grade:
+        card.my_grade = new_grade
+        card.my_price = card.ungraded_price if new_grade == "Raw" else card.graded_price
+        db.session.commit()
+    return redirect(url_for("main.home"))
 
 @main.route("/delete_card/card/<int:card_id>", methods=["DELETE"])
 def delete_card(card_id):
@@ -150,33 +196,3 @@ def delete_wishlist(card_id):
     db.session.delete(card)
     db.session.commit()
     return "", 204
-
-@main.route("/scan_card", methods=["POST"])
-def scan_card():
-    if "image" not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
-
-    grade = request.form.get("grade", "Raw")
-    image_bytes = request.files["image"].read()
-    matches = find_top_matches(image_bytes)
-
-    if not best or dist > 12:
-        return jsonify({
-            "error": "Card not confidently recognised",
-            "distance": dist
-        }), 400
-
-    try:
-        ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
-        ungraded_price = parse_price(ungraded_price_raw)
-        graded_price = parse_price(graded_price_raw)
-        my_price = ungraded_price if grade == "Raw" else graded_price
-
-        card = PokemonCard(name=name, number=number, ungraded_price=ungraded_price, graded_price=graded_price, my_grade=grade, my_price=my_price, image=img_bytes)
-        db.session.add(card)
-        db.session.commit()
-        return redirect(url_for("main.home"))
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-

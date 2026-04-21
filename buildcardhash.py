@@ -1,14 +1,16 @@
 import os
 import json
-from PIL import Image
-import imagehash
+import cv2
+import numpy as np
 
 IMAGE_DIR = "card_images"
-OUT_FILE = "card_hashes.json"
+OUT_FILE = "card_features.json"
 
-cards = []
+orb = cv2.ORB_create(nfeatures=1000)
 
-print("[START] Building card hash database")
+db = []
+
+print("[START] Building ORB feature database")
 
 for root, _, files in os.walk(IMAGE_DIR):
     if root == IMAGE_DIR:
@@ -23,29 +25,42 @@ for root, _, files in os.walk(IMAGE_DIR):
         path = os.path.join(root, file)
 
         try:
-            img = Image.open(path).convert("RGB")
-            img = img.resize((256, 356))
+            img_array = np.fromfile(path, np.uint8)
+            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
-            h = imagehash.phash(img)
+            if img is None:
+                print(f"[ERROR] Could not decode: {path}")
+                continue
+
+            img = cv2.resize(img, (512, 712))
+
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            kp, des = orb.detectAndCompute(gray, None)
+
+            if des is None:
+                print(f"[SKIP] No features: {file}")
+                continue
 
             base = os.path.splitext(file)[0]
+
             if "_" not in base:
-                print(f"[SKIP] Bad filename {file}")
+                print(f"[SKIP] Bad filename format: {file}")
                 continue
 
             name, number = base.rsplit("_", 1)
 
-            cards.append({
-                "hash": h.__str__(),
+            db.append({
                 "name": name,
                 "number": number,
-                "set": set_id
+                "set": set_id,
+                "descriptors": des.tolist()
             })
 
         except Exception as e:
-            print(f"[SKIP] {file}: {e}")
+            print(f"[ERROR] {file}: {e}")
 
-with open(OUT_FILE, "w", encoding="utf-8") as f:
-    json.dump(cards, f, indent=2)
+with open(OUT_FILE, "w") as f:
+    json.dump(db, f)
 
-print(f"[DONE] {len(cards)} cards hashed → {OUT_FILE}")
+print(f"[DONE] {len(db)} cards saved → {OUT_FILE}")
