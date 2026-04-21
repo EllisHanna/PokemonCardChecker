@@ -14,8 +14,17 @@ import numpy as np
 
 main = Blueprint("main", __name__)
 
-with open("card_hashes.json", "r") as f:
-    HASH_DB = json.load(f)
+FEATURE_DB = None
+
+def load_db():
+    global FEATURE_DB
+    if FEATURE_DB is None:
+        with open("card_features.json", "r") as f:
+            FEATURE_DB = json.load(f)
+    return FEATURE_DB
+
+orb = cv2.ORB_create(nfeatures=1000)
+bf = cv2.BFMatcher(cv2.NORM_HAMMING)
 
 CONFIDENT_MAX = 25
 TOP_K = 5
@@ -56,38 +65,36 @@ def extract_card_candidates(image_bytes):
         cards.append(cv2.resize(img, (512, 712)))
     return cards
 
-def hash_image(np_img):
-    img_rgb = cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB)
-    img = Image.fromarray(img_rgb)
+def match_card(np_img):
+    gray = cv2.cvtColor(np_img, cv2.COLOR_BGR2GRAY)
+    kp, des = orb.detectAndCompute(gray, None)
 
-    ph = imagehash.phash(img, hash_size=16)
-    dh = imagehash.dhash(img, hash_size=16)
-    ah = imagehash.average_hash(img, hash_size=16)
+    if des is None:
+        return []
 
-    return ph, dh, ah
-
-def find_top_matches(image_bytes):
-    candidates = extract_card_candidates(image_bytes)
     results = []
 
-    for candidate in candidates:
-        ph, dh, ah = hash_image(candidate)
+    for card in load_db():
+        des_db = np.array(card["descriptors"], dtype=np.uint8)
 
-        for card in HASH_DB:
-            ph_db = imagehash.hex_to_hash(card["phash"])
-            dh_db = imagehash.hex_to_hash(card["dhash"])
-            ah_db = imagehash.hex_to_hash(card["ahash"])
+        matches = bf.knnMatch(des, des_db, k=2)
 
-            dist = (ph - ph_db) + (dh - dh_db) + (ah - ah_db)
+        good = []
+        for m_n in matches:
+            if len(m_n) != 2:
+                continue
+            m, n = m_n
+            if m.distance < 0.75 * n.distance:
+                good.append(m)
 
-            results.append({
-                "name": card["name"],
-                "number": card["number"],
-                "set": card.get("set"),
-                "distance": dist
-            })
+        results.append({
+            "name": card["name"],
+            "number": card["number"],
+            "set": card.get("set"),
+            "score": len(good)
+        })
 
-    results.sort(key=lambda x: x["distance"])
+    results.sort(key=lambda x: x["score"], reverse=True)
     return results[:TOP_K]
 
 @main.route("/")
@@ -145,34 +152,96 @@ def add_wishlist():
 
 @main.route("/scan_card", methods=["POST"])
 def scan_card():
-    if "image" not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
-    grade = request.form.get("grade", "Raw")
-    image_bytes = request.files["image"].read()
-    matches = find_top_matches(image_bytes)
-    if not matches:
-        return jsonify({"error": "No matches found"}), 400
-    best = matches[0]
-
-    print("==== DEBUG MATCHES ====")
-    for m in matches[:5]:
-        print(m)
-
-    name, number = best["name"], best["number"]
-    print("TOP MATCHES:", matches[:5])
     try:
-        ungraded_price_raw, graded_price_raw, img_bytes = asyncio.run(webscrape(name, number))
-        ungraded_price = parse_price(ungraded_price_raw)
-        graded_price = parse_price(graded_price_raw)
-        my_price = ungraded_price if grade == "Raw" else graded_price
-        card = PokemonCard(name=name, number=number, ungraded_price=ungraded_price, graded_price=graded_price, my_grade=grade, my_price=my_price, image=img_bytes)
-        db.session.add(card)
-        db.session.commit()
-        print("TOP MATCHES:", matches[:5])
-        return redirect(url_for("main.home"))
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        if "image" not in request.files:
+            print("SCAN ERROR: No image uploaded")
+            return jsonify({"error": "No image uploaded"}), 400
 
+        grade = request.form.get("grade", "Raw")
+        image_bytes = request.files["image"].read()
+
+        print("SCAN STARTED")
+
+        candidates = extract_card_candidates(image_bytes)
+        print(f"FOUND {len(candidates)} CANDIDATES")
+
+        all_results = []
+
+        for i, c in enumerate(candidates):
+            results = match_card(c)
+            print(f"CANDIDATE {i} TOP:", results[:3])
+            all_results.extend(results)
+
+        all_results.sort(key=lambda x: x["score"], reverse=True)
+        matches = all_results[:TOP_K]
+
+        print("TOP MATCHES:", matches)
+
+        if not matches:
+            print("SCAN FAIL: No matches found")
+            return jsonify({"error": "No matches found"}), 400
+
+        best = matches[0]
+        print("BEST MATCH:", best)
+
+        if best["score"] < 80:
+            print("SCAN FAIL: Too low confidence", best["score"])
+            return jsonify({
+                "error": "Card not recognized",
+                "debug_best": best,
+                "debug_matches": matches
+            }), 400
+
+        name, number = best["name"], best["number"]
+
+        print(f"FINAL MATCH USED: {name} #{number}")
+
+        try:
+            result = asyncio.run(webscrape(name, number))
+            print("SCRAPE RESULT:", result)
+
+            if not result or len(result) != 3:
+                raise ValueError(f"Invalid scraper result: {result}")
+
+            ungraded_price_raw, graded_price_raw, img_bytes = result
+
+            ungraded_price = parse_price(ungraded_price_raw)
+            graded_price = parse_price(graded_price_raw)
+            my_price = ungraded_price if grade == "Raw" else graded_price
+
+            card = PokemonCard(
+                name=name,
+                number=number,
+                ungraded_price=ungraded_price,
+                graded_price=graded_price,
+                my_grade=grade,
+                my_price=my_price,
+                image=img_bytes
+            )
+
+            db.session.add(card)
+            db.session.commit()
+
+            print("SUCCESS: Card added")
+
+            return redirect(url_for("main.home"))
+
+        except Exception as e:
+            print("WEBSCRAPE ERROR:", repr(e))
+            return jsonify({
+                "error": "Webscrape failed",
+                "details": str(e),
+                "name": name,
+                "number": number
+            }), 500
+
+    except Exception as e:
+        print("SCAN CRASH:", repr(e))
+        return jsonify({
+            "error": "Scan crashed",
+            "details": str(e)
+        }), 500
+        
 @main.route("/set_grade/<int:card_id>", methods=["POST"])
 def set_grade(card_id):
     card = PokemonCard.query.get_or_404(card_id)
