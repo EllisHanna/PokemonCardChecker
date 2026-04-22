@@ -54,15 +54,11 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-accent ungraded-price"
-                  >£{{ card.ungraded_price }}</span
-                >
+                <span class="highlight-accent ungraded-price">£{{ card.ungraded_price }}</span>
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-accent graded-price"
-                  >£{{ card.graded_price }}</span
-                >
+                <span class="highlight-accent graded-price">£{{ card.graded_price }}</span>
               </p>
 
               <form method="POST" action="{{ url_for('main.set_grade', card_id=card.id) }}">
@@ -143,15 +139,11 @@
             <div class="card-desc">
               <p>
                 Ungraded Price:
-                <span class="highlight-accent ungraded-price"
-                  >£{{ card.ungraded_price }}</span
-                >
+                <span class="highlight-accent ungraded-price">£{{ card.ungraded_price }}</span>
               </p>
               <p>
                 Graded Price:
-                <span class="highlight-accent graded-price"
-                  >£{{ card.graded_price }}</span
-                >
+                <span class="highlight-accent graded-price">£{{ card.graded_price }}</span>
               </p>
               <p>Added: {{ card.created_at.strftime('%d-%m-%Y') }}</p>
             </div>
@@ -170,6 +162,7 @@
           </p>
         </div>
       </div>
+
       <div id="add-wishlist-modal" class="modal">
         <div class="modal-content">
           <span class="close-button">&times;</span>
@@ -208,9 +201,7 @@
           action="{{ url_for('main.scan_card') }}"
           enctype="multipart/form-data"
         >
-          <label for="camera-input" class="file-upload-label"
-            >Upload Card</label
-          >
+          <label for="camera-input" class="file-upload-label">Upload Card</label>
           <input
             type="file"
             id="camera-input"
