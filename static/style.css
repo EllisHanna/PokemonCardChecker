@@ -25,6 +25,10 @@ body {
   padding-bottom: 80px;
 }
 
+p{
+  font-size: 12px;
+}
+
 .highlight-accent {
   color: var(--accent);
 }
@@ -192,6 +196,7 @@ body {
 
 .card-name {
   font-weight: 800;
+  font-size: 20px;
 }
 
 .card-number {
@@ -378,6 +383,44 @@ body.delete-mode .card:hover {
 
 .match-option:hover {
   background: #eee;
+}
+
+.grade-form {
+  display: flex;
+}
+
+.grade-segment {
+  display: flex;
+  background-color: var(--secondary2);
+  border: 1px solid var(--secondary);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.seg-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex: 1;
+}
+
+.seg-btn:not(:last-child) {
+  border-right: 1px solid var(--secondary);
+}
+
+.seg-btn:hover {
+  background-color: var(--secondary);
+  color: var(--accent);
+}
+
+.seg-btn.active {
+  background-color: var(--accent);
+  color: var(--secondary);
 }
 
 @media (max-width: 768px) {
